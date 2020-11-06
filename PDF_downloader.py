@@ -76,7 +76,11 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
             i += 1
 
         sort_and_merge_pdfs(os.getcwd() + path + '\\*.pdf', output_folder, output_name)
-        print('Successfully merged PDF to folder: {}'.format(output_folder))
+        if links:
+            print('Successfully merged PDF to folder: {}'.format(output_folder))
+            return True
+        else:
+            return False
     except Exception as e:
         raise e
     finally:

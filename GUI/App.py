@@ -106,8 +106,11 @@ class Application(tk.Frame):
         elif browser == '1':
             cookiejar = browser_cookie3.chrome(domain_name='ntnu.blackboard.com')
         try:
-            pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar)
-            messagebox.showinfo('Success', 'Successfully created PDF!')
+            if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar):
+                messagebox.showinfo('Success', 'Successfully created PDF!')
+            else:
+                messagebox.showerror('Did not find any pdf-links', 'Error occured. Magit statke sure you are logged into BB\n'
+                                                                   'in Firefox.')
         except Exception as e:
             messagebox.showerror('Exception', 'Exception occured:\n {}'.format(e))
             raise e
