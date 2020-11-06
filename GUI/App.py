@@ -17,7 +17,6 @@ class Application(tk.Frame):
         self.master = master
         self.master.title('Blackboard to PDF')
 
-        #self.master.bind("<Control-s>", lambda x: self.save_config())
         self.master.bind("<Return>", lambda x: self.start_pdf_thread())
         self.pdfThread = None
         self.create_widgets()

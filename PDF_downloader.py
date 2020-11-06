@@ -19,7 +19,6 @@ def get_content_from_url(url, cookiejar):
     resp = requests.get(url, cookies=cookiejar)
     download_link = 'https://ntnu.blackboard.com'
     content = str(resp.content)
-    pdflink = []
     pdfdict = {}
     for link in BeautifulSoup(content, parse_only=SoupStrainer('a'), features="lxml"):
         try:
@@ -69,7 +68,6 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
             shutil.rmtree(path)
             os.makedirs(path)
         i = 0
-        #i = 38
         for link in links:
             response = requests.get(link, cookies=cookiejar, stream=True)
             with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
