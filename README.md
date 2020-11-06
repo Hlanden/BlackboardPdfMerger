@@ -4,7 +4,7 @@ A simple program to take all PDFs from one Blackboard link and merge them to one
 # How to use
 - Clone the project
 - Run "pip install -r requirements.txt" in the terminal opened in the cloned folder
-- Download Firefox and log into Blackboard
+- Download Firefox (if you haven't already) and log into Blackboard
 - Run the GUI-application with "python GUI/App.py"
 - Follow the instructions
 
