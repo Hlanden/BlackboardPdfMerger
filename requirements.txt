@@ -1,0 +1,4 @@
+pikepdf
+browser-cookie3
+beautifulsoup4
+requests
