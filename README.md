@@ -1,5 +1,5 @@
 # BlackboardPDFMerger
-A simple program to take all PDFs from one Blackboard link and merge them to one big PDF. The program is in early development, and has been made in a "hurry" - Errors can occur...
+A simple program to take all PDFs from one Blackboard link and merge them to one big PDF. It will merge them in the order that they are uploaded on Blackboard. The program is in early development, and has been made in a "hurry" - Errors can occur...
 
 # How to use
 - Clone the project
