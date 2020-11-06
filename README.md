@@ -1,6 +1,8 @@
 # BlackboardPDFMerger
 A simple program to take all PDFs from one Blackboard link and merge them to one big PDF. It will merge them in the order that they are uploaded on Blackboard. The program is in early development, and has been made in a "hurry" - Errors can occur...
 
+Only tested in Windows.
+
 # How to use
 - Clone the project
 - Run "pip install -r requirements.txt" in the terminal opened in the cloned folder
