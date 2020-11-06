@@ -19,7 +19,6 @@ def get_sorted_pdfs(filepath):
             number = file.split('.pdf')[0].split('\\')
             number = number[len(number)-1]
             pdfDict[file] = int(number)
-    print(pdfDict)
     sortedPdfList = sorted(pdfDict, key=pdfDict.get)
     return sortedPdfList
 
