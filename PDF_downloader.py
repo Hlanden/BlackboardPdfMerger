@@ -81,4 +81,4 @@ def generate_pdf(url, output_folder, output_name):
         raise e
     finally:
         time.sleep(5)
-        #shutil.rmtree(os.getcwd() + path)
+        shutil.rmtree(os.getcwd() + path)
