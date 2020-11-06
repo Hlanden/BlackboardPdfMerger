@@ -33,7 +33,6 @@ def sort_and_merge_pdfs(filepath, output_folder, output_name):
     mergelist = get_sorted_pdfs(filepath)
     if mergelist:
         mergedPdf = Pdf.new()
-        #merger = PdfFileMerger()
         for pdf in mergelist:
             try:
                 input = Pdf.open(pdf)

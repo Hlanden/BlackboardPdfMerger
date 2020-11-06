@@ -11,6 +11,7 @@ def get_content_from_url(url, cookiejar):
     """Get dowload links for all pdfs in the given blackboard-url
     Keyword arguments:
         url[String] -- url to the blackboard page containing the pdf-files
+        cookiejar[browser_cookie3.Cookiejar] -- cookiejar containg cookies required to log in to BB
 
     Return:
          pdflink[list] -- list of download-urls for the pdf-files in the given url
@@ -57,6 +58,7 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
         url[String] -- url to the blackboard page containing the pdf-files
         output_folder[String] -- path to the output-folder of the merged pdf
         output_name[String] -- name of the merged pdf (NOTE: Do not includ ".pdf" in the name)
+        cookiejar[browser_cookie3.Cookiejar] -- cookiejar containg cookies required to log in to BB
     """
     links = get_content_from_url(url, cookiejar)
     try:
