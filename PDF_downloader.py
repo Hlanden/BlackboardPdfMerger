@@ -60,22 +60,22 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
     """
     links = get_content_from_url(url, cookiejar)
     try:
-        path = '\\tmp'
-        if not os.path.exists(os.getcwd() + path):
-            os.makedirs(os.getcwd() + path)
+        path = os.path.join(os.getcwd(), 'tmp')
+        if not os.path.exists(path):
+            os.makedirs(path)
         else:
-            shutil.rmtree(os.getcwd() + path)
-            os.makedirs(os.getcwd() + path)
+            shutil.rmtree(path)
+            os.makedirs(path)
         i = 0
         #i = 38
         for link in links:
             response = requests.get(link, cookies=cookiejar, stream=True)
-            with open(path[1:] + '/' + str(i)+'.pdf', 'wb+') as fd:
+            with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
                 for chunk in response.iter_content(2000):
                     fd.write(chunk)
             i += 1
 
-        sort_and_merge_pdfs(os.getcwd() + path + '\\*.pdf', output_folder, output_name)
+        sort_and_merge_pdfs(os.path.join(path, '*.pdf'), output_folder, output_name)
         if links:
             print('Successfully merged PDF to folder: {}'.format(output_folder))
             return True
@@ -85,4 +85,4 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
         raise e
     finally:
         time.sleep(5)
-        shutil.rmtree(os.getcwd() + path)
+        shutil.rmtree(path)
