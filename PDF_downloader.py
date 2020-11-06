@@ -21,7 +21,6 @@ def get_content_from_url(url, cookiejar):
     pdflink = []
     pdfdict = {}
     for link in BeautifulSoup(content, parse_only=SoupStrainer('a'), features="lxml"):
-        print(link)
         try:
             if link.attrs['href'].startswith('/bbcswebdav/'):
                 tmp = int(str(link.attrs['href']).split('pid-')[1][0:6])

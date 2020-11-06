@@ -10,7 +10,6 @@ import PDF_downloader as pdf
 import threading
 import browser_cookie3
 
-cookiejar = browser_cookie3.firefox(domain_name='ntnu.blackboard.com')
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -31,6 +30,12 @@ class Application(tk.Frame):
                                         '\t3. Select the output-fodler where the combined PDF will be saved\n'
                                         '\t4. Select the name of the output-pdf\n'
                                         '\t5. Generate combined PDF', justify=tk.LEFT)
+        self.stringVarBrowser = tk.StringVar()
+        self.labelBrowser = tk.Label(self.master, text='Select browser:')
+        self.rbFirefox = tk.Radiobutton(self.master, text='Firefox', variable=self.stringVarBrowser, value=0)
+        self.rbChrome = tk.Radiobutton(self.master, text='Chrome', variable=self.stringVarBrowser, value=1)
+        self.stringVarBrowser.set(0)
+
         self.labelBdLink = tk.Label(self.master, text='Link to Blackboard-folder:')
         self.entryBbLink = tk.Entry(self.master, width=50)
 
@@ -48,7 +53,12 @@ class Application(tk.Frame):
 
         """-----------------------------------------GRID-----------------------------------------------------------"""
         self.labelHowToHeader.grid(row=1, column=1)
-        self.labelHowTo.grid(row=3, column=1)
+        self.labelHowTo.grid(row=2, column=1, pady=10)
+
+        #self.labelBrowser.grid(row=3, column=1)
+        #self.rbFirefox.grid(row=4, column=1,sticky='W')
+        #self.rbChrome.grid(row=4, column=1, sticky='E')
+
         self.labelBdLink.grid(row=5, column=1, pady=10)
         self.entryBbLink.grid(row=6, column=1)
 
@@ -79,6 +89,7 @@ class Application(tk.Frame):
         bbLink = self.entryBbLink.get()
         outputFolder = self.entryOutputFolder.get()
         outputName = self.entryOutputName.get()
+        browser = self.stringVarBrowser.get()
 
         if not bbLink:
             messagebox.showerror('No Blackboard link provided', 'Please enter Blackboard link')
@@ -89,6 +100,11 @@ class Application(tk.Frame):
         if not outputName:
             messagebox.showerror('No output name provided', 'Please enter output name')
             return
+
+        if browser == '0':
+            cookiejar = browser_cookie3.firefox(domain_name='ntnu.blackboard.com')
+        elif browser == '1':
+            cookiejar = browser_cookie3.chrome(domain_name='ntnu.blackboard.com')
         try:
             pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar)
             messagebox.showinfo('Success', 'Successfully created PDF!')
