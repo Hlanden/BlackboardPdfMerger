@@ -1,0 +1,114 @@
+%%
+% System setup:
+
+% Parameters:
+tau = 200;
+q = 25^2;
+sigma_v = 5;
+T = 1; % Discretization time step
+
+% Continuous time model:
+A_c = [0 0 1 0; 0 0 0 1; 0 0 -1/tau 0; 0 0 0 -1/tau];
+C = [1 0 0 0; 0 1 0 0];
+n = size(A_c,1);
+G = [0 0; 0 0; 1/tau 0; 0 1/tau];
+
+% Disturbance covariance matrix:
+Q_w = q*eye(2);
+
+% Noise covariance matrix:
+R_v = (sigma_v^2)*eye(2)*T;
+
+% Discretization, Van Loan's method:
+X = [A_c G*Q_w*G'; zeros(n) -A_c']*T; % Construct matrix
+eX = expm(X); % Compute matrix exponential
+A = eX(1:n,1:n); % Extract the discrete time A
+Q = eX(1:n,n+1:end)*A'; % Extract the discrete time Q
+R = R_v/T; % Compute discrete time R
+
+% In discrete time, we have four disturbance signals with off-diagonal 
+% elements in the covariance matrix. To simplify simulation, we
+% diagonalize the disturbances using Q's eigenvalues and eigenvectors:
+[V_Q,E_Q] = eig(Q); 
+sigma_w = sqrt(diag(E_Q)); % The std. dev. of the independent disturbance signals
+sigma_v = sqrt(diag(R)); % The std. dev. of the independent noise signals
+
+%%
+% Simulation of system:
+
+t = 0:T:600;
+ntimes = length(t);
+
+x0 = [0; 0; 0; 0]; % Initial value
+
+% Initialize matrices for state and output values:
+x_all = zeros(ntimes, length(x0));
+x_all_t = zeros(ntimes, length(x0));
+y_all = zeros(ntimes, size(C,1));
+y_all_t = zeros(ntimes, size(C,1));
+y_all_t_meas = zeros(ntimes, size(C,1));
+
+% Initialize true system x, a priori and a posteriori x and P:
+x_t = x0; % Initial value, true system
+x_pri = x0; % Initial a priori estimate
+x = x0; % Initial a posteriori estimate
+P_pri = zeros(length(x0)); % Initial a priori P
+P = zeros(length(x0)); % Initial a posteriori P
+
+% Simulation loop:
+for i=1:ntimes
+   
+    % Random disturbances. Each independent value is scaled by its 
+    % appropriate std. dev., then the vector is premultiplied by
+    % V_Q (the eigenvector matrix of Q) to get the signals correlated
+    % according to Q (see lecture on diagnonalization of disturbances)
+    % The randn() function outputs normally distributed random numbers:
+    w = V_Q*(sigma_w.*randn(size(sigma_w)));
+    
+    % Random noise (each scaled by its std. dev.):
+    v = sigma_v.*randn(size(sigma_v));
+
+    % Update true system:
+    y_t = (C*x_t + v); % Measurement
+    y_all_t_meas(i,:) = y_t'; % Store measurement for plotting
+    y_all_t(i,:) = (C*x_t)'; % Store noiseless output for plotting
+    x_t = A*x_t + w; % Compute next time step
+    x_all_t(i,:) = x_t'; % Store state vector for plotting
+
+    % 1. Calculate Kalman gain:
+    L = P_pri*C'*inv(C*P_pri*C' + R);
+
+    % 2. Update estimate:
+    x = x_pri + L*(y_t - C*x_pri);
+    
+    % 3. Update error covariance matrix:
+    P = (eye(n) - L*C)*P_pri*(eye(n) - L*C)' + L*R*L';
+    
+    % 4. Project ahead:
+    x_pri = A*x;
+    P_pri = A*P*A' + Q;
+    
+    % Store a posteriori values:
+    y = C*x;
+    y_all(i,:) = y';
+    x_all(i,:) = x';
+
+end
+%%
+% Naive speed estimate:
+u_n = [0; diff(y_all_t_meas(:,1))];
+v_n = [0; diff(y_all_t_meas(:,2))];
+
+%%
+% Plotting:
+
+% Plot positions:
+figure, plot(y_all_t(:,1), y_all_t(:,2),'LineWidth',1), title('Position'),grid on, axis image;
+hold on, plot(y_all_t_meas(:,1), y_all_t_meas(:,2),'.','LineWidth',1)
+plot(y_all(:,1), y_all(:,2), 'k', 'LineWidth',1), legend('True position', 'Measurement', 'Kalman filter')
+
+% Plot speeds:
+figure, plot(t, sqrt(x_all_t(:,3).^2 + x_all_t(:,4).^2),'g -','LineWidth',0.5), title('Speed'),grid on, hold on;
+plot(t, sqrt(x_all(:,3).^2 + x_all(:,4).^2), 'k -','LineWidth',0.5), legend('True speed', 'Kalman filter')
+plot(t, sqrt(u_n.^2 + v_n.^2), 'r -','LineWidth',0.5), legend('True speed', 'Kalman filter' ,'Naive estimate')
+xlabel('Time (s)');  ylabel('Speed (m/s)');
