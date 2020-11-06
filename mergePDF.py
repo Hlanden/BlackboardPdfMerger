@@ -1,6 +1,7 @@
 from pikepdf import Pdf
 import glob
 import pikepdf
+import os
 
 def get_sorted_pdfs(filepath):
     """Get sorted list of pdf-files in a folder. Sorted by number.
@@ -16,8 +17,7 @@ def get_sorted_pdfs(filepath):
     for _ in range(myrange):
         if pdfs:
             file = pdfs.pop(0)
-            number = file.split('.pdf')[0].split('\\')
-            number = number[len(number)-1]
+            number = os.path.split(file)[1].split('.pdf')[0]
             pdfDict[file] = int(number)
     sortedPdfList = sorted(pdfDict, key=pdfDict.get)
     return sortedPdfList
@@ -43,6 +43,6 @@ def sort_and_merge_pdfs(filepath, output_folder, output_name):
             except Exception as e:
                 print('Unexpected error: {}'.format(e))
                 raise e
-        mergedPdf.save('{}/{}.pdf'.format(output_folder, output_name))
+        mergedPdf.save(os.path.join(output_folder, '{}.pdf'.format(output_name)))
     else:
         print("mergelist is empty please check your input path")
