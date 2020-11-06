@@ -1,4 +1,3 @@
-import browser_cookie3
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
 import time
@@ -6,8 +5,9 @@ from mergePDF import *
 import shutil
 import os
 
-cookiejar = browser_cookie3.firefox(domain_name='https://ntnu.blackboard.com')
-def get_content_from_url(url):
+
+
+def get_content_from_url(url, cookiejar):
     """Get dowload links for all pdfs in the given blackboard-url
     Keyword arguments:
         url[String] -- url to the blackboard page containing the pdf-files
@@ -15,13 +15,13 @@ def get_content_from_url(url):
     Return:
          pdflink[list] -- list of download-urls for the pdf-files in the given url
     """
-    resp = requests.get(url,
-                        cookies=cookiejar)
+    resp = requests.get(url, cookies=cookiejar)
     download_link = 'https://ntnu.blackboard.com'
     content = str(resp.content)
     pdflink = []
     pdfdict = {}
     for link in BeautifulSoup(content, parse_only=SoupStrainer('a'), features="lxml"):
+        print(link)
         try:
             if link.attrs['href'].startswith('/bbcswebdav/'):
                 tmp = int(str(link.attrs['href']).split('pid-')[1][0:6])
@@ -40,7 +40,8 @@ def get_content_from_url(url):
                                 while pdfdict.__contains__(tmp):
                                     tmp += 1
                                 pdfdict[tmp] = download_link + link2['href']
-                        except Exception:
+                        except Exception as e:
+                            print(e)
                             pass
 
         except Exception:
@@ -50,7 +51,7 @@ def get_content_from_url(url):
 
     return pdflink
 
-def generate_pdf(url, output_folder, output_name):
+def generate_pdf(url, output_folder, output_name, cookiejar):
     """Downlaods all pds in the given url and merges them to an output file
 
     Keyword arguments:
@@ -58,7 +59,7 @@ def generate_pdf(url, output_folder, output_name):
         output_folder[String] -- path to the output-folder of the merged pdf
         output_name[String] -- name of the merged pdf (NOTE: Do not includ ".pdf" in the name)
     """
-    links = get_content_from_url(url)
+    links = get_content_from_url(url, cookiejar)
     try:
         path = '\\tmp'
         if not os.path.exists(os.getcwd() + path):

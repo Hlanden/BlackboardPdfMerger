@@ -8,7 +8,9 @@ from tkinter import filedialog
 from pathlib import Path
 import PDF_downloader as pdf
 import threading
+import browser_cookie3
 
+cookiejar = browser_cookie3.firefox(domain_name='ntnu.blackboard.com')
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -88,7 +90,7 @@ class Application(tk.Frame):
             messagebox.showerror('No output name provided', 'Please enter output name')
             return
         try:
-            pdf.generate_pdf(bbLink, outputFolder, outputName)
+            pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar)
             messagebox.showinfo('Success', 'Successfully created PDF!')
         except Exception as e:
             messagebox.showerror('Exception', 'Exception occured:\n {}'.format(e))
