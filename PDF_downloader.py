@@ -4,8 +4,7 @@ import time
 from mergePDF import *
 import shutil
 import os
-
-
+import re
 
 def get_content_from_url(url, cookiejar):
     """Get dowload links for all pdfs in the given blackboard-url
@@ -60,6 +59,7 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
         cookiejar[browser_cookie3.Cookiejar] -- cookiejar containg cookies required to log in to BB
     """
     links = get_content_from_url(url, cookiejar)
+    filenames = []
     try:
         path = os.path.join(os.getcwd(), 'tmp')
         if not os.path.exists(path):
@@ -70,12 +70,15 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
         i = 0
         for link in links:
             response = requests.get(link, cookies=cookiejar, stream=True)
-            with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
-                for chunk in response.iter_content(2000):
-                    fd.write(chunk)
-            i += 1
+            filename = os.path.basename(response.url)
+            if filename.__contains__('.pdf'):
+                with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
+                    for chunk in response.iter_content(2000):
+                        fd.write(chunk)
+                filenames.append(filename)
+                i += 1
 
-        sort_and_merge_pdfs(os.path.join(path, '*.pdf'), output_folder, output_name)
+        sort_and_merge_pdfs(os.path.join(path, '*.pdf'), output_folder, output_name, filenames)
         if links:
             print('Successfully merged PDF to folder: {}'.format(output_folder))
             return True
