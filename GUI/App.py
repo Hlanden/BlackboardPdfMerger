@@ -9,7 +9,7 @@ from pathlib import Path
 import PDF_downloader as pdf
 import threading
 import browser_cookie3
-
+from tkinter.ttk import Progressbar
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -50,6 +50,9 @@ class Application(tk.Frame):
         self.buttonGeneratePdf = tk.Button(self.master, text='Generate Combined PDF', font=('', 12, 'bold'),
                                            command=self.start_pdf_thread, fg='Green')
 
+        self.labelProgress = tk.Label(self.master, text='Download progress:')
+        self.progressbar=Progressbar(self.master,orient=tk.HORIZONTAL,length=200,mode='determinate')
+
         """-----------------------------------------GRID-----------------------------------------------------------"""
         self.labelHowToHeader.grid(row=1, column=1)
         self.labelHowTo.grid(row=2, column=1, pady=10)
@@ -69,6 +72,8 @@ class Application(tk.Frame):
         self.entryOutputName.grid(row=10, column=1)
 
         self.buttonGeneratePdf.grid(row=15, column=1, pady=10)
+
+        
 
     def browse_output_folder(self, stringVar):
         foldername = str(Path(filedialog.askdirectory()))
@@ -105,7 +110,10 @@ class Application(tk.Frame):
         elif browser == '1':
             cookiejar = browser_cookie3.chrome(domain_name='ntnu.blackboard.com')
         try:
-            if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar):
+            self.labelProgress.grid(row=16, column=1)
+            self.progressbar.grid(row=17, column=0, columnspan=3, pady=10)
+        
+            if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar, progressbar=self.progressbar):
                 messagebox.showinfo('Success', 'Successfully created PDF!')
             else:
                 messagebox.showerror('Did not find any pdf-links', 'Error occured. Magit statke sure you are logged into BB\n'
@@ -113,6 +121,9 @@ class Application(tk.Frame):
         except Exception as e:
             messagebox.showerror('Exception', 'Exception occured:\n {}'.format(e))
             raise e
+        finally:
+            self.labelProgress.grid_forget()
+            self.progressbar.grid_forget()
 
 
 

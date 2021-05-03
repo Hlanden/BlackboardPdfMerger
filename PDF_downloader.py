@@ -49,7 +49,7 @@ def get_content_from_url(url, cookiejar):
 
     return pdflink
 
-def generate_pdf(url, output_folder, output_name, cookiejar):
+def generate_pdf(url, output_folder, output_name, cookiejar, progressbar=None):
     """Downlaods all pds in the given url and merges them to an output file
 
     Keyword arguments:
@@ -67,6 +67,15 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
         else:
             shutil.rmtree(path)
             os.makedirs(path)
+        
+        i = 0
+        pdf_count = 0
+        for link in links:
+            response = requests.get(link, cookies=cookiejar, stream=True)
+            filename = os.path.basename(response.url)
+            if filename.__contains__('.pdf'):
+                
+                pdf_count += 1
         i = 0
         for link in links:
             response = requests.get(link, cookies=cookiejar, stream=True)
@@ -77,6 +86,8 @@ def generate_pdf(url, output_folder, output_name, cookiejar):
                         fd.write(chunk)
                 filenames.append(filename)
                 i += 1
+                if progressbar is not None:
+                    progressbar['value'] = int(i/pdf_count*100)
 
         sort_and_merge_pdfs(os.path.join(path, '*.pdf'), output_folder, output_name, filenames)
         if links:
