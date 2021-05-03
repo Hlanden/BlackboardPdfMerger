@@ -11,3 +11,8 @@ Currently only tested in Windows.
 - Follow the instructions
 
 Note: This is a private project, and has not been made in collaboration with Blackboard. Please do not contact them for questions about this app.
+
+# Using the new BB
+BB was updated in 2021, and you need to do some tricks to get it to work with the updated version:
+![bilde](https://user-images.githubusercontent.com/37532926/116880955-f4271680-ac22-11eb-89f5-13a36b0a35e0.png)
+
