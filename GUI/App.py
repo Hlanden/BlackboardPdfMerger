@@ -47,6 +47,12 @@ class Application(tk.Frame):
         self.labelOutputName = tk.Label(self.master, text='Select name for the the merged PDF')
         self.entryOutputName = tk.Entry(self.master)
 
+        self.advancedValue = tk.IntVar()
+        self.AdvancedSelection = tk.Checkbutton(self.master, text='Advanced options',variable=self.advancedValue, command=self.start_show_advanced_thred)
+
+        self.selectionLabel = tk.Label(self.master, text='Select PDFs to EXCLUDE:')
+        self.selectioLb = tk.Listbox(self.master, width=100, selectmode='multiple')
+        
         self.buttonGeneratePdf = tk.Button(self.master, text='Generate Combined PDF', font=('', 12, 'bold'),
                                            command=self.start_pdf_thread, fg='Green')
 
@@ -71,10 +77,39 @@ class Application(tk.Frame):
         self.labelOutputName.grid(row=9, column=1, pady=10)
         self.entryOutputName.grid(row=10, column=1)
 
-        self.buttonGeneratePdf.grid(row=15, column=1, pady=10)
+        self.AdvancedSelection.grid(row=11, column=0, columnspan=3)
+        self.buttonGeneratePdf.grid(row=20, column=1, pady=10)
 
-        
+    def start_show_advanced_thred(self):
+        advanced_thread = threading.Thread(target=self.show_hide_advanced, args=(), daemon=True)
+        advanced_thread.start()
 
+    def show_hide_advanced(self):
+        if self.advancedValue.get():
+            bbLink = self.entryBbLink.get()
+            browser = self.stringVarBrowser.get()
+            if browser == '0':
+                cookiejar = browser_cookie3.firefox(domain_name='ntnu.blackboard.com')
+            elif browser == '1':
+                cookiejar = browser_cookie3.chrome(domain_name='ntnu.blackboard.com')
+
+            if not bbLink:
+                messagebox.showerror('No Blackboard link provided', 'Please enter Blackboard link')
+                self.advancedValue.set(0)
+                return
+            self.master.config(cursor="wait")
+
+            self.selectionLabel.grid(row=12, column=1)
+            self.selectioLb.grid(row=13, column=1)
+            if self.advancedValue.get():
+                names = pdf.get_names(bbLink, cookiejar)
+                for name in names:
+                    self.selectioLb.insert(tk.END, name)
+            self.master.config(cursor="")
+        else:
+            self.selectionLabel.grid_forget()
+            self.selectioLb.grid_forget()
+            
     def browse_output_folder(self, stringVar):
         foldername = str(Path(filedialog.askdirectory()))
         stringVar.set(foldername)
@@ -110,10 +145,14 @@ class Application(tk.Frame):
         elif browser == '1':
             cookiejar = browser_cookie3.chrome(domain_name='ntnu.blackboard.com')
         try:
-            self.labelProgress.grid(row=16, column=1)
-            self.progressbar.grid(row=17, column=0, columnspan=3, pady=10)
-        
-            if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar, progressbar=self.progressbar):
+            self.labelProgress.grid(row=21, column=1)
+            self.progressbar.grid(row=22, column=0, columnspan=3, pady=10)
+            if self.advancedValue.get():
+                names = [self.selectioLb.get(idx) for idx in self.selectioLb.curselection()]
+                count = self.selectioLb.size() - len(names)
+            else:
+                count = None
+            if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar, progressbar=self.progressbar, count=count, selection=names):
                 messagebox.showinfo('Success', 'Successfully created PDF!')
             else:
                 messagebox.showerror('Did not find any pdf-links', 'Error occured. Magit statke sure you are logged into BB\n'
@@ -122,6 +161,7 @@ class Application(tk.Frame):
             messagebox.showerror('Exception', 'Exception occured:\n {}'.format(e))
             raise e
         finally:
+            self.progressbar['value'] = 0
             self.labelProgress.grid_forget()
             self.progressbar.grid_forget()
 

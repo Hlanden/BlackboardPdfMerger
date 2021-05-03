@@ -49,7 +49,17 @@ def get_content_from_url(url, cookiejar):
 
     return pdflink
 
-def generate_pdf(url, output_folder, output_name, cookiejar, progressbar=None):
+def get_names(url, cookiejar):
+    links = get_content_from_url(url, cookiejar)
+    names = []
+    for link in links:
+        response = requests.get(link, cookies=cookiejar, stream=True)
+        filename = os.path.basename(response.url)
+        if filename.__contains__('.pdf'): 
+            names.append(filename)
+    return names
+
+def generate_pdf(url, output_folder, output_name, cookiejar, count=None, progressbar=None, selection=None):
     """Downlaods all pds in the given url and merges them to an output file
 
     Keyword arguments:
@@ -67,27 +77,42 @@ def generate_pdf(url, output_folder, output_name, cookiejar, progressbar=None):
         else:
             shutil.rmtree(path)
             os.makedirs(path)
+        if count is None:
+            names = []
+            for link in links:
+                response = requests.get(link, cookies=cookiejar, stream=True)
+                filename = os.path.basename(response.url)
+                if filename.__contains__('.pdf'): 
+                    names.append(filename)
+
+            count = len(names)
+
         
-        i = 0
-        pdf_count = 0
-        for link in links:
-            response = requests.get(link, cookies=cookiejar, stream=True)
-            filename = os.path.basename(response.url)
-            if filename.__contains__('.pdf'):
-                
-                pdf_count += 1
+
         i = 0
         for link in links:
             response = requests.get(link, cookies=cookiejar, stream=True)
             filename = os.path.basename(response.url)
-            if filename.__contains__('.pdf'):
-                with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
-                    for chunk in response.iter_content(2000):
-                        fd.write(chunk)
-                filenames.append(filename)
-                i += 1
-                if progressbar is not None:
-                    progressbar['value'] = int(i/pdf_count*100)
+            if selection is None:
+                if filename.__contains__('.pdf'):
+                    with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
+                        for chunk in response.iter_content(2000):
+                            fd.write(chunk)
+                    filenames.append(filename)
+                    i += 1
+                    if progressbar is not None:
+                        progressbar['value'] = int(i/count*100)
+            else:
+                if filename.__contains__('.pdf') and not selection.__contains__(filename):
+                    with open(os.path.join(path, str(i) + '.pdf'), 'wb+') as fd:
+                        for chunk in response.iter_content(2000):
+                            fd.write(chunk)
+                    filenames.append(filename)
+                    i += 1
+                    if progressbar is not None:
+                        progressbar['value'] = int(i/count*100)
+                else:
+                    print('Excluding; ', filename)
 
         sort_and_merge_pdfs(os.path.join(path, '*.pdf'), output_folder, output_name, filenames)
         if links:
