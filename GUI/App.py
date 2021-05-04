@@ -151,6 +151,7 @@ class Application(tk.Frame):
                 names = [self.selectioLb.get(idx) for idx in self.selectioLb.curselection()]
                 count = self.selectioLb.size() - len(names)
             else:
+                names = []
                 count = None
             if pdf.generate_pdf(bbLink, outputFolder, outputName, cookiejar, progressbar=self.progressbar, count=count, selection=names):
                 messagebox.showinfo('Success', 'Successfully created PDF!')
